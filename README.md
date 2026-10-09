@@ -87,6 +87,10 @@ src/carteira/
 - **Composição:** clientes possuem contas e cartões; a carteira mantém seus objetos cadastrados.
 - **Exceções personalizadas:** erros de negócio são representados por subclasses de `CarteiraException`.
 
+## Diagrama de classe
+
+![Diagrama](./public/Diagrama%20de%20classe.png)
+
 ## O que ainda pode ser explorado:
 
 ### Cartão de crédito
