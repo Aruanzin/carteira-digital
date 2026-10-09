@@ -39,10 +39,11 @@ src/carteira/
 - Registrar operações no extrato e aplicar fechamento mensal.
 - Transferir valores entre contas cadastradas e consultar o limite disponível do cartão.
 
-### Etapa 2 - Regras de cadastro
+### Etapa 2 - Regras de cadastro (regras básicas concluídas)
 
 - Validar titular, número da conta, limite e saldo inicial.
 - Impedir contas e cartões duplicados.
+- Usar exceções específicas para cadastros inválidos e duplicidades.
 - Associar cartões a um cliente, em vez de mantê-los apenas em uma lista global.
 
 ### Etapa 3 - Transferências e usuários

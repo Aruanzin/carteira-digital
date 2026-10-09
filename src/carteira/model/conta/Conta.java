@@ -1,6 +1,7 @@
 package carteira.model.conta;
 
 import carteira.exception.CarteiraException;
+import carteira.exception.CadastroInvalidoException;
 import carteira.exception.SaldoInsuficienteException;
 import carteira.exception.ValorInvalidoException;
 import carteira.model.pagamento.MetodoPagamento;
@@ -15,7 +16,16 @@ public abstract class Conta {
     protected double saldo;
     private final List<String> extrato = new ArrayList<>();
 
-    protected Conta(String numero, String titular, double saldoInicial) {
+    protected Conta(String numero, String titular, double saldoInicial) throws CadastroInvalidoException {
+        if (numero == null || numero.isBlank()) {
+            throw new CadastroInvalidoException("O número da conta é obrigatório.");
+        }
+        if (titular == null || titular.isBlank()) {
+            throw new CadastroInvalidoException("O titular da conta é obrigatório.");
+        }
+        if (saldoInicial < 0) {
+            throw new CadastroInvalidoException("O saldo inicial não pode ser negativo.");
+        }
         this.numero = numero;
         this.titular = titular;
         this.saldo = saldoInicial;

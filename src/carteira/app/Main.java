@@ -25,7 +25,7 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws CarteiraException {
         CarteiraController carteira = new CarteiraController();
         Conta corrente = new ContaCorrente("001", "Ana", 500, 200);
         Conta poupanca = new ContaPoupanca("002", "Ana", 1000);
@@ -33,6 +33,18 @@ public class Main {
         carteira.cadastrarConta(corrente);
         carteira.cadastrarConta(poupanca);
         carteira.cadastrarCartao(cartao);
+
+        System.out.println("=== 0. Regras de cadastro ===");
+        try {
+            carteira.cadastrarConta(new ContaCorrente("001", "Outra pessoa", 100, 50));
+        } catch (CarteiraException e) {
+            System.out.println("  Cadastro recusado (" + e.getClass().getSimpleName() + "): " + e.getMessage());
+        }
+        try {
+            carteira.cadastrarCartao(new CartaoCredito("1234-5678", 500));
+        } catch (CarteiraException e) {
+            System.out.println("  Cadastro recusado (" + e.getClass().getSimpleName() + "): " + e.getMessage());
+        }
 
         System.out.println("=== 1. Polimorfismo nos pagamentos ===");
         tentar(carteira, "PIX válido", corrente, new Pix("ana@email.com"), 100);

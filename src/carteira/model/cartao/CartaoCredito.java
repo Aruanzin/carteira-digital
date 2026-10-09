@@ -1,6 +1,7 @@
 package carteira.model.cartao;
 
 import carteira.exception.LimiteExcedidoException;
+import carteira.exception.CadastroInvalidoException;
 import carteira.exception.SaldoInsuficienteException;
 import carteira.exception.ValorInvalidoException;
 import carteira.model.conta.Conta;
@@ -10,7 +11,13 @@ public class CartaoCredito {
     private final double limite;
     private double fatura;
 
-    public CartaoCredito(String numero, double limite) {
+    public CartaoCredito(String numero, double limite) throws CadastroInvalidoException {
+        if (numero == null || numero.isBlank()) {
+            throw new CadastroInvalidoException("O número do cartão é obrigatório.");
+        }
+        if (limite <= 0) {
+            throw new CadastroInvalidoException("O limite do cartão deve ser maior que zero.");
+        }
         this.numero = numero;
         this.limite = limite;
     }
