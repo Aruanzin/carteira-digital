@@ -3,6 +3,7 @@ package carteira.app;
 import carteira.controller.CarteiraController;
 import carteira.exception.CarteiraException;
 import carteira.model.cartao.CartaoCredito;
+import carteira.model.cliente.Cliente;
 import carteira.model.conta.Conta;
 import carteira.model.conta.ContaCorrente;
 import carteira.model.conta.ContaPoupanca;
@@ -30,9 +31,14 @@ public class Main {
         Conta corrente = new ContaCorrente("001", "Ana", 500, 200);
         Conta poupanca = new ContaPoupanca("002", "Ana", 1000);
         CartaoCredito cartao = new CartaoCredito("1234-5678", 1000);
+        Cliente ana = new Cliente("Ana", "ana-001");
         carteira.cadastrarConta(corrente);
         carteira.cadastrarConta(poupanca);
         carteira.cadastrarCartao(cartao);
+        carteira.cadastrarCliente(ana);
+        carteira.associarConta(ana, corrente);
+        carteira.associarConta(ana, poupanca);
+        carteira.associarCartao(ana, cartao);
 
         System.out.println("=== 0. Regras de cadastro ===");
         try {

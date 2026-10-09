@@ -48,7 +48,8 @@ src/carteira/
 
 ### Etapa 3 - Transferências e usuários
 
-- Criar cliente e identificação única.
+- Criar cliente e identificação única. (concluído)
+- Associar contas e cartões cadastrados ao cliente. (concluído)
 - Implementar PIX entre contas da carteira. A primeira versão já possui transferência interna entre contas.
 - Registrar origem, destino, data, valor e status de cada transação.
 
