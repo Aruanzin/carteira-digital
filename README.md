@@ -1,10 +1,12 @@
 # Carteira Digital
 
-Projeto didático em Java para evoluir uma carteira digital inspirada em produtos como o PicPay. O foco é praticar orientação a objetos com regras de contas, meios de pagamento, cartões e exceções de negócio.
+Projeto didático em Java para praticar orientação a objetos por meio de uma carteira digital inspirada em funcionalidades de produtos como o PicPay.
+
+O projeto simula contas, cartões, pagamentos, transferências e PIX entre clientes. O foco desta primeira entrega é demonstrar classes, herança, polimorfismo, encapsulamento e tratamento de erros por meio de exceções personalizadas.
 
 ## Como executar
 
-No diretório raiz do projeto:
+No diretório raiz do projeto, abra o PowerShell e execute:
 
 ```powershell
 Remove-Item out -Recurse -Force -ErrorAction SilentlyContinue
@@ -12,74 +14,112 @@ javac -d out (Get-ChildItem -Recurse -Filter *.java src | ForEach-Object { $_.Fu
 java -cp out carteira.app.Main
 ```
 
-O programa de demonstração exercita PIX, boleto, cartão de crédito, exceções, fechamento mensal e extrato.
+O programa de demonstração exercita:
 
-## Organização atual
+- cadastro de contas, cartões e clientes;
+- rejeição de cadastros duplicados;
+- pagamentos via PIX, boleto e cartão de crédito;
+- tratamento de valores inválidos, PIX inválido, boleto vencido e saldo insuficiente;
+- transferências entre contas;
+- PIX entre clientes;
+- pagamento integral da fatura;
+- fechamento mensal de contas;
+- consulta do extrato.
+
+## Organização do projeto
 
 ```text
 src/carteira/
-|-- app/          # Ponto de entrada e demonstração
-|-- controller/   # Casos de uso de entrada da aplicação
-|-- exception/    # Exceções de negócio do sistema
+|-- app/            # Ponto de entrada e demonstração
+|-- controller/     # Casos de uso da carteira
+|-- exception/      # Exceções de negócio
 `-- model/
-	|-- cartao/   # Cartões de crédito
-	|-- conta/    # Conta, corrente e poupança
-	`-- pagamento/ # PIX, boleto e pagamento com cartão
+    |-- cartao/    # Cartões de crédito
+    |-- cliente/   # Clientes e seus produtos
+    |-- conta/     # Conta, conta corrente e conta poupança
+    |-- pagamento/ # PIX, boleto e pagamento com cartão
+    `-- transacao/ # Transações e seus status
 ```
 
-`Conta` concentra saldo e extrato. `MetodoPagamento` representa uma estratégia de pagamento, permitindo que PIX, boleto e cartão tenham regras próprias. `CarteiraController` mantém os cadastros da carteira e encaminha pagamentos para o domínio.
+`CarteiraController` coordena os cadastros e as operações da carteira. `Conta` concentra as regras de saldo e extrato. `MetodoPagamento` define uma estratégia comum para PIX, boleto e cartão. `Cliente` agrupa contas e cartões pertencentes ao mesmo usuário. `Transacao` representa um PIX com seus participantes, valor, descrição, data e status.
 
-## Roadmap por etapas
+## Funcionalidades implementadas
 
-### Etapa 1 - Fundamentos e organização (atual)
+### Contas
 
-- Separar aplicação, controlador, domínio e exceções em pacotes.
-- Manter contas corrente e poupança.
-- Manter pagamentos via PIX, boleto e cartão de crédito.
-- Registrar operações no extrato e aplicar fechamento mensal.
-- Transferir valores entre contas cadastradas e consultar o limite disponível do cartão.
+- Conta abstrata com saldo, saque, depósito, pagamento e extrato.
+- `ContaCorrente` com limite de cheque especial e tarifa mensal.
+- `ContaPoupanca` com rendimento no fechamento mensal.
+- Transferência entre contas com validação de origem, destino e saldo.
 
-### Etapa 2 - Regras de cadastro (regras básicas concluídas)
+### Pagamentos
 
-- Validar titular, número da conta, limite e saldo inicial.
-- Impedir contas e cartões duplicados.
-- Usar exceções específicas para cadastros inválidos e duplicidades.
-- Associar cartões a um cliente, em vez de mantê-los apenas em uma lista global.
+- PIX com validação de chave.
+- Pagamento de boleto com validação de vencimento.
+- Compra com cartão de crédito.
+- Validação de parcelas.
+- Consulta de limite disponível.
+- Pagamento integral da fatura usando uma conta.
 
-### Etapa 3 - Transferências e usuários
+### Cadastro e clientes
 
-- Criar cliente e identificação única. (concluído)
-- Associar contas e cartões cadastrados ao cliente. (concluído)
-- Implementar PIX entre contas da carteira. A primeira versão já possui transferência interna entre contas.
-- Registrar origem, destino, data, valor e status de cada transação.
+- Cadastro de contas, cartões e clientes.
+- Validação de nome, identificação, número, limite e saldo inicial.
+- Prevenção de contas, cartões e clientes duplicados.
+- Associação de contas e cartões a clientes.
+- Impedimento de associação de um mesmo produto a mais de um cliente.
 
-### Etapa 4 - Cartão de crédito
+### PIX e transações
 
-- Fatura por ciclo e lançamento de parcelas.
-- Pagamento da fatura usando uma conta da carteira.
-- A primeira versão já permite quitar a fatura integralmente usando uma conta.
-- Cartões de diferentes instituições e validações de cartão.
-
-### Etapa 5 - Investimentos
-
-- Criar produtos de investimento e perfil de risco.
-- Aplicação, resgate, rendimento e posição do cliente.
-- Separar saldo disponível de saldo investido.
-
-### Etapa 6 - Persistência e qualidade
-
-- Substituir listas em memória por repositórios.
-- Adicionar testes automatizados para regras e exceções.
-- Adicionar uma API ou interface, mantendo o domínio independente da camada de entrada.
+- PIX entre clientes cadastrados.
+- Escolha explícita da conta de origem e da conta de destino.
+- Validação de pertencimento das contas aos clientes.
+- Registro de remetente, destinatário, valor, descrição, data e status.
+- Status `PENDENTE`, `CONCLUIDA` e `RECUSADA`.
 
 ## Conceitos de POO praticados
 
-- **Herança:** `Conta` é especializada em `ContaCorrente` e `ContaPoupanca`.
-- **Polimorfismo:** `MetodoPagamento` possui implementações para PIX, boleto e cartão.
-- **Encapsulamento:** saldo, fatura e extrato são alterados por operações do domínio.
-- **Exceções personalizadas:** `CarteiraException` é a base das falhas de negócio.
-- **Composição:** o controlador mantém contas e cartões cadastrados.
+- **Classes:** representação de contas, clientes, cartões, pagamentos e transações.
+- **Herança:** `ContaCorrente` e `ContaPoupanca` especializam `Conta`.
+- **Polimorfismo:** cada implementação de `MetodoPagamento` possui sua própria regra de processamento.
+- **Abstração:** `Conta` e `MetodoPagamento` definem comportamentos comuns.
+- **Encapsulamento:** saldo, fatura, extratos e coleções são protegidos por métodos do domínio.
+- **Composição:** clientes possuem contas e cartões; a carteira mantém seus objetos cadastrados.
+- **Exceções personalizadas:** erros de negócio são representados por subclasses de `CarteiraException`.
 
-## Observações
+## O que ainda pode ser explorado:
 
-Este é um projeto educacional. Para uma aplicação financeira real, valores monetários devem usar `BigDecimal`, as operações precisam de persistência transacional e autenticação, e as regras devem ser cobertas por testes automatizados.
+### Cartão de crédito
+
+- Criar lançamentos individuais de compras.
+- Implementar parcelamento real.
+- Organizar fatura por ciclo e data de vencimento.
+- Permitir pagamento parcial da fatura.
+- Associar cada cartão diretamente ao seu cliente.
+
+### Funcionalidades inspiradas em carteiras digitais
+
+- QR Code para cobrança.
+- Solicitação de dinheiro.
+- PIX agendado.
+- Recarga de celular.
+- Pagamento de contas.
+- Cashback.
+- Cofrinhos e investimentos.
+
+### Qualidade e testes
+
+- Criar testes automatizados para regras e exceções.
+- Cobrir transferências, PIX recusado, duplicidade e pagamento de fatura.
+- Substituir `double` por `BigDecimal` para valores monetários.
+- Melhorar mensagens e validações de cadastro.
+
+### Evolução da aplicação
+
+- Adicionar persistência por meio de repositórios.
+- Separar melhor as camadas de domínio, aplicação e infraestrutura.
+- Criar uma interface de terminal ou uma API.
+- Adicionar autenticação e autorização.
+- Implementar notificações e histórico filtrável.
+
+

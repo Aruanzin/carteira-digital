@@ -10,6 +10,7 @@ import carteira.model.cartao.CartaoCredito;
 import carteira.model.cliente.Cliente;
 import carteira.model.conta.Conta;
 import carteira.model.pagamento.MetodoPagamento;
+import carteira.model.transacao.Transacao;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +20,7 @@ public class CarteiraController {
     private final List<Conta> contas = new ArrayList<>();
     private final List<CartaoCredito> cartoes = new ArrayList<>();
     private final List<Cliente> clientes = new ArrayList<>();
+    private final List<Transacao> transacoes = new ArrayList<>();
 
     public void cadastrarCliente(Cliente cliente) throws CarteiraException {
         if (cliente == null) {
@@ -94,6 +96,26 @@ public class CarteiraController {
         origem.transferirPara(destino, valor);
     }
 
+    public Transacao enviarPix(Cliente remetente, Conta contaOrigem,
+                               Cliente destinatario, Conta contaDestino,
+                               double valor, String descricao) throws CarteiraException {
+        validarClienteCadastrado(remetente);
+        validarClienteCadastrado(destinatario);
+        validarContaDoCliente(remetente, contaOrigem, "A conta de origem");
+        validarContaDoCliente(destinatario, contaDestino, "A conta de destino");
+
+        Transacao transacao = new Transacao(remetente, destinatario, valor, descricao);
+        transacoes.add(transacao);
+        try {
+            contaOrigem.transferirPara(contaDestino, valor);
+            transacao.concluir();
+            return transacao;
+        } catch (CarteiraException e) {
+            transacao.recusar();
+            throw e;
+        }
+    }
+
     public List<Conta> listarContas() {
         return Collections.unmodifiableList(contas);
     }
@@ -106,9 +128,20 @@ public class CarteiraController {
         return Collections.unmodifiableList(clientes);
     }
 
+    public List<Transacao> listarTransacoes() {
+        return Collections.unmodifiableList(transacoes);
+    }
+
     private void validarClienteCadastrado(Cliente cliente) throws CadastroInvalidoException {
         if (cliente == null || !clientes.contains(cliente)) {
             throw new CadastroInvalidoException("O cliente precisa estar cadastrado na carteira.");
+        }
+    }
+
+    private void validarContaDoCliente(Cliente cliente, Conta conta, String descricao)
+            throws CadastroInvalidoException {
+        if (conta == null || !cliente.getContas().contains(conta)) {
+            throw new CadastroInvalidoException(descricao + " não pertence ao cliente informado.");
         }
     }
 }

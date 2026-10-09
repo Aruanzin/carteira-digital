@@ -32,6 +32,8 @@ public class Main {
         Conta poupanca = new ContaPoupanca("002", "Ana", 1000);
         CartaoCredito cartao = new CartaoCredito("1234-5678", 1000);
         Cliente ana = new Cliente("Ana", "ana-001");
+        Conta contaBruno = new ContaCorrente("003", "Bruno", 300, 0);
+        Cliente bruno = new Cliente("Bruno", "bruno-001");
         carteira.cadastrarConta(corrente);
         carteira.cadastrarConta(poupanca);
         carteira.cadastrarCartao(cartao);
@@ -39,6 +41,9 @@ public class Main {
         carteira.associarConta(ana, corrente);
         carteira.associarConta(ana, poupanca);
         carteira.associarCartao(ana, cartao);
+        carteira.cadastrarConta(contaBruno);
+        carteira.cadastrarCliente(bruno);
+        carteira.associarConta(bruno, contaBruno);
 
         System.out.println("=== 0. Regras de cadastro ===");
         try {
@@ -50,6 +55,13 @@ public class Main {
             carteira.cadastrarCartao(new CartaoCredito("1234-5678", 500));
         } catch (CarteiraException e) {
             System.out.println("  Cadastro recusado (" + e.getClass().getSimpleName() + "): " + e.getMessage());
+        }
+        System.out.println("\n=== PIX entre clientes ===");
+        try {
+            carteira.enviarPix(ana, corrente, bruno, contaBruno, 75, "Pagamento do almoço");
+            carteira.listarTransacoes().forEach(transacao -> System.out.println("  " + transacao));
+        } catch (CarteiraException e) {
+            System.out.println("  PIX recusado (" + e.getClass().getSimpleName() + "): " + e.getMessage());
         }
 
         System.out.println("=== 1. Polimorfismo nos pagamentos ===");
