@@ -28,22 +28,22 @@ public class Main {
 
     public static void main(String[] args) throws CarteiraException {
         CarteiraController carteira = new CarteiraController();
-        Conta corrente = new ContaCorrente("001", "Ana", 500, 200);
-        Conta poupanca = new ContaPoupanca("002", "Ana", 1000);
+        Conta corrente = new ContaCorrente("001", "Aruan", 500, 200);
+        Conta poupanca = new ContaPoupanca("002", "Aruan", 1000);
         CartaoCredito cartao = new CartaoCredito("1234-5678", 1000);
-        Cliente ana = new Cliente("Ana", "ana-001");
-        Conta contaBruno = new ContaCorrente("003", "Bruno", 300, 0);
-        Cliente bruno = new Cliente("Bruno", "bruno-001");
+        Cliente aruan = new Cliente("Aruan", "aruan-001");
+        Conta contaJohnatas = new ContaCorrente("003", "Johnatas", 300, 0);
+        Cliente johnatas = new Cliente("Johnatas", "johnatas-001");
         carteira.cadastrarConta(corrente);
         carteira.cadastrarConta(poupanca);
         carteira.cadastrarCartao(cartao);
-        carteira.cadastrarCliente(ana);
-        carteira.associarConta(ana, corrente);
-        carteira.associarConta(ana, poupanca);
-        carteira.associarCartao(ana, cartao);
-        carteira.cadastrarConta(contaBruno);
-        carteira.cadastrarCliente(bruno);
-        carteira.associarConta(bruno, contaBruno);
+        carteira.cadastrarCliente(aruan);
+        carteira.associarConta(aruan, corrente);
+        carteira.associarConta(aruan, poupanca);
+        carteira.associarCartao(aruan, cartao);
+        carteira.cadastrarConta(contaJohnatas);
+        carteira.cadastrarCliente(johnatas);
+        carteira.associarConta(johnatas, contaJohnatas);
 
         System.out.println("=== 0. Regras de cadastro ===");
         try {
@@ -58,7 +58,7 @@ public class Main {
         }
         System.out.println("\n=== PIX entre clientes ===");
         try {
-            carteira.enviarPix(ana, corrente, bruno, contaBruno, 75, "Pagamento do almoço");
+            carteira.enviarPix(aruan, corrente, johnatas, contaJohnatas, 75, "Pagamento do almoço");
             carteira.listarTransacoes().forEach(transacao -> System.out.println("  " + transacao));
         } catch (CarteiraException e) {
             System.out.println("  PIX recusado (" + e.getClass().getSimpleName() + "): " + e.getMessage());
