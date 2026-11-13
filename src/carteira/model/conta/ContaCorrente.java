@@ -3,6 +3,7 @@ package carteira.model.conta;
 import carteira.exception.CadastroInvalidoException;
 
 public class ContaCorrente extends Conta {
+    private static final long serialVersionUID = 1L;
     private static final double TARIFA_MENSAL = 10.0;
     private final double limiteChequeEspecial;
 

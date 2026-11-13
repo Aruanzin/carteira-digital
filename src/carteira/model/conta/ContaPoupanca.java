@@ -3,6 +3,7 @@ package carteira.model.conta;
 import carteira.exception.CadastroInvalidoException;
 
 public class ContaPoupanca extends Conta {
+    private static final long serialVersionUID = 1L;
     private static final double TAXA_RENDIMENTO = 0.005;
 
     public ContaPoupanca(String numero, String titular, double saldoInicial)

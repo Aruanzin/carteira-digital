@@ -4,8 +4,10 @@ import carteira.exception.CadastroInvalidoException;
 import carteira.model.cliente.Cliente;
 
 import java.time.LocalDateTime;
+import java.io.Serializable;
 
-public class Transacao {
+public class Transacao implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final Cliente remetente;
     private final Cliente destinatario;
     private final double valor;

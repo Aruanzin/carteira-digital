@@ -5,24 +5,49 @@ import carteira.exception.CartaoDuplicadoException;
 import carteira.exception.ContaDuplicadaException;
 import carteira.exception.CadastroInvalidoException;
 import carteira.exception.ClienteDuplicadoException;
+import carteira.exception.ChavePixInvalidaException;
 import carteira.exception.ValorInvalidoException;
 import carteira.model.cartao.CartaoCredito;
 import carteira.model.cliente.Cliente;
 import carteira.model.conta.Conta;
 import carteira.model.pagamento.MetodoPagamento;
 import carteira.model.transacao.Transacao;
+import carteira.persistence.ArquivoRepository;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class CarteiraController {
+public class CarteiraController implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private static final ArquivoRepository<CarteiraController> REPOSITORIO = new ArquivoRepository<>();
     private final List<Conta> contas = new ArrayList<>();
     private final List<CartaoCredito> cartoes = new ArrayList<>();
     private final List<Cliente> clientes = new ArrayList<>();
     private final List<Transacao> transacoes = new ArrayList<>();
 
-    public void cadastrarCliente(Cliente cliente) throws CarteiraException {
+    public synchronized void salvar(Path arquivo) throws CarteiraException {
+        try {
+            REPOSITORIO.salvar(arquivo, this);
+        } catch (IOException e) {
+            throw new carteira.exception.PersistenciaException(
+                    "Não foi possível salvar a carteira em " + arquivo + ".", e);
+        }
+    }
+
+    public static CarteiraController carregar(Path arquivo) throws CarteiraException {
+        try {
+            return REPOSITORIO.carregar(arquivo).orElseGet(CarteiraController::new);
+        } catch (IOException | ClassNotFoundException e) {
+            throw new carteira.exception.PersistenciaException(
+                    "Não foi possível carregar a carteira de " + arquivo + ".", e);
+        }
+    }
+
+    public synchronized void cadastrarCliente(Cliente cliente) throws CarteiraException {
         if (cliente == null) {
             throw new CadastroInvalidoException("O cliente é obrigatório.");
         }
@@ -35,7 +60,7 @@ public class CarteiraController {
         clientes.add(cliente);
     }
 
-    public void cadastrarConta(Conta conta) throws CarteiraException {
+    public synchronized void cadastrarConta(Conta conta) throws CarteiraException {
         if (conta == null) {
             throw new CadastroInvalidoException("A conta é obrigatória.");
         }
@@ -47,7 +72,7 @@ public class CarteiraController {
         contas.add(conta);
     }
 
-    public void cadastrarCartao(CartaoCredito cartao) throws CarteiraException {
+    public synchronized void cadastrarCartao(CartaoCredito cartao) throws CarteiraException {
         if (cartao == null) {
             throw new CadastroInvalidoException("O cartão é obrigatório.");
         }
@@ -59,7 +84,7 @@ public class CarteiraController {
         cartoes.add(cartao);
     }
 
-    public void associarConta(Cliente cliente, Conta conta) throws CarteiraException {
+    public synchronized void associarConta(Cliente cliente, Conta conta) throws CarteiraException {
         validarClienteCadastrado(cliente);
         if (!contas.contains(conta)) {
             throw new CadastroInvalidoException("A conta precisa estar cadastrada na carteira.");
@@ -72,7 +97,7 @@ public class CarteiraController {
         cliente.adicionarConta(conta);
     }
 
-    public void associarCartao(Cliente cliente, CartaoCredito cartao) throws CarteiraException {
+    public synchronized void associarCartao(Cliente cliente, CartaoCredito cartao) throws CarteiraException {
         validarClienteCadastrado(cliente);
         if (!cartoes.contains(cartao)) {
             throw new CadastroInvalidoException("O cartão precisa estar cadastrado na carteira.");
@@ -85,18 +110,41 @@ public class CarteiraController {
         cliente.adicionarCartao(cartao);
     }
 
-    public void pagar(Conta conta, MetodoPagamento metodo, double valor) throws CarteiraException {
+    public synchronized void pagar(Conta conta, MetodoPagamento metodo, double valor) throws CarteiraException {
         conta.pagar(metodo, valor);
     }
 
-    public void transferir(Conta origem, Conta destino, double valor) throws CarteiraException {
+    public synchronized void transferir(Conta origem, Conta destino, double valor) throws CarteiraException {
         if (origem == null) {
             throw new ValorInvalidoException("A conta de origem é obrigatória.");
         }
         origem.transferirPara(destino, valor);
     }
 
-    public Transacao enviarPix(Cliente remetente, Conta contaOrigem,
+    public synchronized void cadastrarChavePix(Conta conta, String chave)
+            throws CarteiraException {
+        if (conta == null || !contas.contains(conta)) {
+            throw new CadastroInvalidoException("A conta precisa estar cadastrada na carteira.");
+        }
+        boolean chaveEmUso = contas.stream()
+                .anyMatch(c -> chave != null && chave.equals(c.getChavePix()));
+        if (chaveEmUso && !chave.equals(conta.getChavePix())) {
+            throw new ChavePixInvalidaException("Esta chave PIX já está associada a outra conta.");
+        }
+        conta.registrarChavePix(chave);
+    }
+
+    public synchronized void pagarPix(Conta origem, String chave, double valor)
+            throws CarteiraException {
+        Conta destino = contas.stream()
+                .filter(conta -> chave != null && chave.equals(conta.getChavePix()))
+                .findFirst()
+                .orElseThrow(() -> new ChavePixInvalidaException(
+                        "Nenhuma conta encontrada para a chave PIX informada."));
+        transferir(origem, destino, valor);
+    }
+
+    public synchronized Transacao enviarPix(Cliente remetente, Conta contaOrigem,
                                Cliente destinatario, Conta contaDestino,
                                double valor, String descricao) throws CarteiraException {
         validarClienteCadastrado(remetente);
@@ -130,6 +178,13 @@ public class CarteiraController {
 
     public List<Transacao> listarTransacoes() {
         return Collections.unmodifiableList(transacoes);
+    }
+
+    public synchronized void limpar() {
+        contas.clear();
+        cartoes.clear();
+        clientes.clear();
+        transacoes.clear();
     }
 
     private void validarClienteCadastrado(Cliente cliente) throws CadastroInvalidoException {

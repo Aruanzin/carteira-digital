@@ -2,6 +2,7 @@ package carteira.model.conta;
 
 import carteira.exception.CarteiraException;
 import carteira.exception.CadastroInvalidoException;
+import carteira.exception.ChavePixInvalidaException;
 import carteira.exception.SaldoInsuficienteException;
 import carteira.exception.ValorInvalidoException;
 import carteira.model.pagamento.MetodoPagamento;
@@ -9,12 +10,15 @@ import carteira.model.pagamento.MetodoPagamento;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.io.Serializable;
 
-public abstract class Conta {
+public abstract class Conta implements Serializable {
+    private static final long serialVersionUID = 1L;
     protected final String numero;
     protected final String titular;
     protected double saldo;
     private final List<String> extrato = new ArrayList<>();
+    private String chavePix;
 
     protected Conta(String numero, String titular, double saldoInicial) throws CadastroInvalidoException {
         if (numero == null || numero.isBlank()) {
@@ -102,6 +106,22 @@ public abstract class Conta {
 
     public String getTitular() {
         return titular;
+    }
+
+    public String getChavePix() {
+        return chavePix;
+    }
+
+    public void registrarChavePix(String chave) throws ChavePixInvalidaException {
+        if (chave == null || chave.isBlank()
+                || !(chave.matches("\\d{11}")
+                || chave.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
+                || chave.matches("\\+?\\d{10,13}")
+                || chave.matches("[0-9a-fA-F-]{32,36}"))) {
+            throw new ChavePixInvalidaException("Chave PIX inválida.");
+        }
+        chavePix = chave.trim();
+        registrar("Chave PIX cadastrada: " + chavePix);
     }
 
     public List<String> getExtrato() {

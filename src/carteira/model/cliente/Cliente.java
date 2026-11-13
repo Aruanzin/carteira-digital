@@ -7,8 +7,10 @@ import carteira.model.conta.Conta;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.io.Serializable;
 
-public class Cliente {
+public class Cliente implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String nome;
     private final String identificacao;
     private final List<Conta> contas = new ArrayList<>();

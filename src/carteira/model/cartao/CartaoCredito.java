@@ -6,7 +6,10 @@ import carteira.exception.SaldoInsuficienteException;
 import carteira.exception.ValorInvalidoException;
 import carteira.model.conta.Conta;
 
-public class CartaoCredito {
+import java.io.Serializable;
+
+public class CartaoCredito implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String numero;
     private final double limite;
     private double fatura;

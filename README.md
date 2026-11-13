@@ -2,7 +2,7 @@
 
 Projeto didático em Java para praticar orientação a objetos por meio de uma carteira digital inspirada em funcionalidades de produtos como o PicPay.
 
-O projeto simula contas, cartões, pagamentos, transferências e PIX entre clientes. O foco desta primeira entrega é demonstrar classes, herança, polimorfismo, encapsulamento e tratamento de erros por meio de exceções personalizadas.
+O projeto simula contas, cartões, pagamentos, transferências e PIX entre clientes. A segunda entrega mantém os conceitos de orientação a objetos da primeira e acrescenta persistência local, auto-save, tipos genéricos e uso de collections.
 
 ## Como executar
 
@@ -14,25 +14,55 @@ javac -d out (Get-ChildItem -Recurse -Filter *.java src | ForEach-Object { $_.Fu
 java -cp out carteira.app.Main
 ```
 
-O programa de demonstração exercita:
+A interface gráfica permite:
 
-- cadastro de contas, cartões e clientes;
-- rejeição de cadastros duplicados;
-- pagamentos via PIX, boleto e cartão de crédito;
-- tratamento de valores inválidos, PIX inválido, boleto vencido e saldo insuficiente;
-- transferências entre contas;
-- PIX entre clientes;
-- pagamento integral da fatura;
-- fechamento mensal de contas;
-- consulta do extrato.
+- escolher uma conta já salva ou criar uma nova;
+- escolher conta corrente ou poupança e informar o saldo inicial;
+- depositar, sacar, transferir e pagar via PIX;
+- cadastrar uma chave PIX única para a conta;
+- pagar boleto com código, valor e vencimento;
+- realizar o fechamento mensal da conta, aplicando tarifa ou rendimento;
+- consultar o extrato;
+- resetar a base pela tela inicial;
+- salvar automaticamente as alterações e ao fechar a janela.
+
+## Segunda entrega: persistência e threads
+
+Os dados da carteira são serializados com a API nativa do Java no arquivo
+`data/carteira.dat`. Esse arquivo é criado automaticamente e fica fora do
+versionamento. Ao iniciar, `Main` tenta carregá-lo; se ele ainda não existir,
+cria os dados iniciais da demonstração. Ao terminar, a carteira é salva
+novamente.
+
+## Interface gráfica
+
+A aplicação usa Swing, sem dependências externas. A tela inicial lista as
+contas persistidas e possui os botões `Entrar na conta`, `Criar conta` e
+`Resetar base`. Dentro de uma conta ficam disponíveis as operações básicas, cadastro da chave
+PIX, pagamento de boleto, fechamento mensal e extrato. O botão de voltar salva
+o estado, e fechar a janela também salva antes de encerrar.
+
+O `AutoSaveThread` é uma thread daemon que salva a carteira a cada cinco
+segundos. A gravação usa um arquivo temporário e troca atômica quando o sistema
+operacional suporta esse recurso, evitando deixar o arquivo principal
+incompleto em caso de interrupção. Erros de gravação são informados no
+`stderr`.
+
+`ArquivoRepository<T extends Serializable>` é um repositório genérico que
+concentra carregar e salvar qualquer objeto serializável. Assim, a mesma
+estrutura pode ser reutilizada para outras entidades sem criar um repositório
+específico para cada classe. As entidades da carteira implementam
+`Serializable`, e as `List` de contas, cartões, clientes e transações continuam
+representando as collections do domínio.
 
 ## Organização do projeto
 
 ```text
 src/carteira/
-|-- app/            # Ponto de entrada e demonstração
+|-- app/            # Ponto de entrada e interface gráfica
 |-- controller/     # Casos de uso da carteira
 |-- exception/      # Exceções de negócio
+|-- persistence/    # Repositório genérico e thread de auto-save
 `-- model/
     |-- cartao/    # Cartões de crédito
     |-- cliente/   # Clientes e seus produtos
@@ -51,6 +81,11 @@ src/carteira/
 - `ContaCorrente` com limite de cheque especial e tarifa mensal.
 - `ContaPoupanca` com rendimento no fechamento mensal.
 - Transferência entre contas com validação de origem, destino e saldo.
+- Cadastro da chave PIX da conta.
+- Pagamento PIX direcionado à conta associada à chave informada, com
+  transferência real entre origem e destino.
+- Fechamento mensal manual, com tarifa na conta corrente ou rendimento na
+  conta poupança.
 
 ### Pagamentos
 
@@ -120,10 +155,7 @@ src/carteira/
 
 ### Evolução da aplicação
 
-- Adicionar persistência por meio de repositórios.
 - Separar melhor as camadas de domínio, aplicação e infraestrutura.
 - Criar uma interface de terminal ou uma API.
 - Adicionar autenticação e autorização.
 - Implementar notificações e histórico filtrável.
-
-
