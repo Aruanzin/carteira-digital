@@ -24,14 +24,14 @@ A interface gráfica permite:
 - realizar o fechamento mensal da conta, aplicando tarifa ou rendimento;
 - consultar o extrato;
 - resetar a base pela tela inicial;
-- salvar automaticamente as alterações e ao fechar a janela.
+- salvar automaticamente a cada cinco segundos e ao fechar a janela.
 
 ## Segunda entrega: persistência e threads
 
 Os dados da carteira são serializados com a API nativa do Java no arquivo
 `data/carteira.dat`. Esse arquivo é criado automaticamente e fica fora do
 versionamento. Ao iniciar, `Main` tenta carregá-lo; se ele ainda não existir,
-cria os dados iniciais da demonstração. Ao terminar, a carteira é salva
+a aplicação começa com uma carteira vazia. Ao terminar, a carteira é salva
 novamente.
 
 ## Interface gráfica
@@ -40,13 +40,19 @@ A aplicação usa Swing, sem dependências externas. A tela inicial lista as
 contas persistidas e possui os botões `Entrar na conta`, `Criar conta` e
 `Resetar base`. Dentro de uma conta ficam disponíveis as operações básicas, cadastro da chave
 PIX, pagamento de boleto, fechamento mensal e extrato. O botão de voltar salva
-o estado, e fechar a janela também salva antes de encerrar.
+o estado visual e retorna à lista; as alterações são persistidas pelo auto-save
+periódico ou no fechamento da janela.
 
 O `AutoSaveThread` é uma thread daemon que salva a carteira a cada cinco
 segundos. A gravação usa um arquivo temporário e troca atômica quando o sistema
 operacional suporta esse recurso, evitando deixar o arquivo principal
 incompleto em caso de interrupção. Erros de gravação são informados no
-`stderr`.
+`stderr`; salvamentos automáticos concluídos são identificados no console com
+o nome `carteira-auto-save`. O salvamento final ao fechar aparece com a
+identificação `[ENCERRAMENTO]`. As operações não salvam imediatamente para
+deixar o auto-save periódico visível durante os testes.
+
+O roteiro da apresentação da segunda entrega está em [roteiro.md](./roteiro.md).
 
 `ArquivoRepository<T extends Serializable>` é um repositório genérico que
 concentra carregar e salvar qualquer objeto serializável. Assim, a mesma

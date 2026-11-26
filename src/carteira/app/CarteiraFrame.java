@@ -26,6 +26,7 @@ import java.awt.CardLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.nio.file.Path;
 
 public class CarteiraFrame extends JFrame {
@@ -104,7 +105,7 @@ public class CarteiraFrame extends JFrame {
         extrato.addActionListener(evento -> mostrarExtrato());
         JButton voltar = new JButton("Voltar");
         voltar.addActionListener(evento -> {
-            salvar();
+            // salvar(); 
             atualizarListaContas();
             layout.show(telas, TELA_INICIAL);
         });
@@ -176,7 +177,7 @@ public class CarteiraFrame extends JFrame {
             carteira.cadastrarConta(conta);
             carteira.cadastrarCliente(cliente);
             carteira.associarConta(cliente, conta);
-            salvar();
+            // salvar();
             atualizarListaContas();
             informar("Conta criada com sucesso.");
         } catch (CarteiraException | NumberFormatException erro) {
@@ -197,8 +198,7 @@ public class CarteiraFrame extends JFrame {
             } else {
                 contaSelecionada.sacar(valor);
             }
-            salvar();
-            atualizarResumo();
+            // salvar();
         } catch (CarteiraException | NumberFormatException erro) {
             informar(erro.getMessage());
         }
@@ -215,7 +215,7 @@ public class CarteiraFrame extends JFrame {
         }
         try {
             carteira.transferir(contaSelecionada, destino, lerValor(texto));
-            salvar();
+            // salvar(); 
             atualizarResumo();
         } catch (CarteiraException | NumberFormatException erro) {
             informar(erro.getMessage());
@@ -233,7 +233,7 @@ public class CarteiraFrame extends JFrame {
         }
         try {
             carteira.pagarPix(contaSelecionada, chave, lerValor(texto));
-            salvar();
+            // salvar();
             atualizarResumo();
         } catch (CarteiraException | NumberFormatException erro) {
             informar(erro.getMessage());
@@ -249,7 +249,7 @@ public class CarteiraFrame extends JFrame {
         }
         try {
             carteira.cadastrarChavePix(contaSelecionada, chave);
-            salvar();
+            // salvar(); 
             atualizarResumo();
             informar("Chave PIX cadastrada.");
         } catch (CarteiraException erro) {
@@ -278,7 +278,7 @@ public class CarteiraFrame extends JFrame {
             carteira.pagar(contaSelecionada,
                     new Boleto(codigo.getText(), LocalDate.now().plusDays(dias)),
                     lerValor(valor.getText()));
-            salvar();
+            // salvar();
             atualizarResumo();
         } catch (CarteiraException | NumberFormatException erro) {
             informar(erro.getMessage());
@@ -293,7 +293,7 @@ public class CarteiraFrame extends JFrame {
             return;
         }
         contaSelecionada.fechamentoMensal();
-        salvar();
+        // salvar(); 
         atualizarResumo();
         informar("Fechamento mensal realizado.");
     }
@@ -329,7 +329,7 @@ public class CarteiraFrame extends JFrame {
             return;
         }
         carteira.limpar();
-        salvar();
+        // salvar();
         atualizarListaContas();
         informar("Base resetada. Nenhuma conta cadastrada.");
     }
@@ -343,6 +343,8 @@ public class CarteiraFrame extends JFrame {
     private void salvar() {
         try {
             carteira.salvar(arquivoDados);
+            System.out.printf("[ENCERRAMENTO] Salvamento final concluído às %s: %s%n",
+                    LocalTime.now().withNano(0), arquivoDados);
         } catch (CarteiraException erro) {
             informar(erro.getMessage());
         }

@@ -3,6 +3,7 @@ package carteira.persistence;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
+import java.time.LocalTime;
 import java.util.function.Supplier;
 
 public class AutoSaveThread<T extends Serializable> extends Thread {
@@ -32,6 +33,8 @@ public class AutoSaveThread<T extends Serializable> extends Thread {
                     synchronized (objeto) {
                         repositorio.salvar(arquivo, objeto);
                     }
+                    System.out.printf("[%s] Auto-save concluído às %s: %s%n",
+                            getName(), LocalTime.now().withNano(0), arquivo);
                 }
             } catch (InterruptedException e) {
                 if (executando) {
